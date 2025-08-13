@@ -394,6 +394,16 @@ void run_hyper_stage_partition(CircuitSeq *seq, int num_frozen_qubits,
       }
       std::cout << std::endl;
     }
+
+    for (size_t i = 0; i < res.size(); ++i) {
+      std::cout << "  Stage " << i << ": {";
+      for (size_t j = 0; j < res[i].size(); ++j) {
+        std::cout << res[i][j];
+        if (j + 1 < res[i].size())
+          std::cout << ", ";
+      }
+      std::cout << "}" << std::endl;
+    }
   }
 
   // Use the new function to count hyper stages
@@ -411,19 +421,32 @@ void run_hyper_stage_partition(CircuitSeq *seq, int num_frozen_qubits,
 
 void run_hyper_stage_partition_dp(CircuitSeq *seq, int num_frozen_qubits,
                                   int num_q, int NUM_LOCAL_QUBITS, FILE *fout,
-                                  Context *ctx) {
+                                  Context *ctx, bool debug = false) {
   std::vector<std::vector<bool>> local_qubits_by_heuristics;
   std::vector<std::vector<int>> hyper_stages;
   std::vector<std::unordered_set<CircuitGate *>> executed_gates_per_stage;
 
-  fprintf(fout, "%d, ", num_q);
-  std::cout << num_q << ", ";
   // first get hyper stages
   auto res = compute_qubit_layout_with_hyper_stage_heuristic_dp(
       *seq, NUM_LOCAL_QUBITS, 1, ctx);
 
+  if (debug) {
+    for (size_t i = 0; i < res.size(); ++i) {
+      std::cout << "  Stage " << i << ": {";
+      for (size_t j = 0; j < res[i].size(); ++j) {
+        std::cout << res[i][j];
+        if (j + 1 < res[i].size())
+          std::cout << ", ";
+      }
+      std::cout << "}" << std::endl;
+    }
+  }
+
   // Use the new function to count hyper stages
   int hyper_stage_count = count_hyper_stages_from_layout(res);
+
+  fprintf(fout, "%d, ", num_q);
+  std::cout << num_q << ", ";
   fprintf(fout, "%d, %d", hyper_stage_count, (int)res.size());
   fflush(fout);
   std::cout << hyper_stage_count << ", " << (int)res.size();
@@ -505,9 +528,9 @@ int main(int argc, char *argv[]) {
 
   // Call the extracted function
   run_hyper_stage_partition(seq.get(), num_frozen_qubits, num_q,
-                            num_local_qubits, fout, &ctx);
+                            num_local_qubits, fout, &ctx, debug);
   run_hyper_stage_partition_dp(seq.get(), num_frozen_qubits, num_q,
-                               num_local_qubits, fout, &ctx);
+                               num_local_qubits, fout, &ctx, debug);
 
   int num_local_qubits_for_baseline = num_local_qubits + 1;
   auto res_snuqs = compute_qubit_layout_with_snuqs_heuristic(
