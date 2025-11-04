@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cstring>
 #include <iostream>
+#include <ratio>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -572,8 +573,9 @@ int main(int argc, char *argv[]) {
 
   fclose(fout);
   auto end = std::chrono::steady_clock::now();
-  std::cout
-      << std::chrono::duration_cast<std::chrono::seconds>(end - start).count()
-      << " seconds." << std::endl;
+  std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end -
+                                                                     start)
+                   .count()
+            << " microseconds." << std::endl;
   return 0;
 }
